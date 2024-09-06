@@ -14,7 +14,7 @@ data['Date'] = pd.to_datetime(data['Date']).dt.tz_localize(None)
 min_year = data['Date'].dt.year.min().astype(int)
 max_year = data['Date'].dt.year.max().astype(int)
 
-# Get unique countries
+# Get unique countries (including all countries)
 countries = sorted(data['Country'].unique())
 
 # Get unique categories, filtering out None values and converting to strings
@@ -35,7 +35,7 @@ tab1_ui = ui.page_fluid(
                             selected="Tout")
         ),
         ui.column(2, 
-            ui.input_numeric("top_n", "# mots-clés", 10, min=1, max=20),
+            ui.input_numeric("top_n", "# mots-clés", 5, min=1, max=20),  # Changed default to 5
         ),
     ),
     ui.layout_columns(
@@ -61,7 +61,7 @@ app_ui = ui.page_navbar(
     ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
     ui.nav_panel("Comparaison de mots-clés choisis", tab2_ui),
     ui.nav_spacer(),
-    ui.nav_control(ui.input_dark_mode()),
+    ui.nav_control(ui.input_dark_mode(id="dark_mode", mode="light")),  # Force light mode as default
     title="IWAC analyse des mots clés",
     id="navbar",
     position="fixed-top"
@@ -81,7 +81,7 @@ def server(input, output, session):
         
         return ui.input_checkbox_group(
             "newspapers",
-            "Journal(s)",
+            "Journaux",
             choices=newspapers,
             selected=newspapers  # Select all newspapers by default
         )
@@ -104,7 +104,8 @@ def server(input, output, session):
         selected_category = input.category()
         
         # Filter data based on the selected year range
-        date_filtered_data = data[(data['Date'].dt.year >= start_year) & (data['Date'].dt.year <= end_year)]
+        date_filtered_data = data[(data['Date'].dt.year >= start_year) & 
+                                  (data['Date'].dt.year <= end_year)]
         
         # Filter by country if a specific country is selected
         if selected_country != "Tout":
@@ -117,6 +118,12 @@ def server(input, output, session):
         # Filter by category if a specific category is selected
         if selected_category != "Tout":
             date_filtered_data = date_filtered_data[date_filtered_data['Category'] == selected_category]
+        
+        # Define excluded keywords
+        excluded_keywords = ["Bénin", "Togo", "Burkina Faso"]
+        
+        # Exclude the specified keywords
+        date_filtered_data = date_filtered_data[~date_filtered_data['Subject'].isin(excluded_keywords)]
         
         # Count occurrences of each subject within the filtered data
         subject_counts = date_filtered_data['Subject'].value_counts()
