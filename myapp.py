@@ -36,16 +36,7 @@ tab1_ui = ui.page_fluid(
             style="text-align: justify; margin-bottom: 20px; padding: 0 20px;"
         ),
     ),
-    ui.layout_columns(
-        ui.column(4,
-            ui.input_select("category", "Catégorie",
-                            choices=categories,
-                            selected="Tout")
-        ),
-        ui.column(4, 
-            ui.input_slider("top_n", "# mots-clés", min=1, max=10, value=5, step=1),
-        ),
-    ),
+    ui.input_slider("top_n", "# mots-clés", min=1, max=10, value=5, step=1),
     output_widget("keyword_plot")
 )
 
@@ -75,6 +66,9 @@ app_ui = ui.page_navbar(
                                    choices=["Tout"] + countries,
                                    selected="Tout"),
                 ui.output_ui("newspaper_selector"),
+                ui.input_select("category", "Catégorie",
+                                choices=categories,
+                                selected="Tout"),
                 ui.input_slider("year_range", "Années", 
                                 min=min_year, max=max_year, 
                                 value=[min_year, max_year],
