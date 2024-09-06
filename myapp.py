@@ -22,7 +22,10 @@ categories = ["Tout"] + sorted(str(cat) for cat in data['Category'].unique() if 
 
 # Define the UI for the first tab (current visualization)
 tab1_ui = ui.page_fluid(
-    ui.h2("Mots-clés les plus fréquents"),
+    ui.div(
+        ui.h2("Mots-clés les plus fréquents", style="text-align: center; margin-bottom: 20px;"),
+        style="padding-top: 60px;"  # Add padding to the top to account for the fixed navbar
+    ),
     ui.layout_columns(
         ui.column(2,
             ui.input_selectize("country", "Pays", 
@@ -54,7 +57,10 @@ tab1_ui = ui.page_fluid(
 )
 
 # Define the UI for the second tab (placeholder for future visualization)
-tab2_ui = ui.h2("Comparaison de mots-clés choisis (à venir)")
+tab2_ui = ui.div(
+    ui.h2("Comparaison de mots-clés choisis (à venir)"),
+    style="padding-top: 60px; text-align: center;"
+)
 
 # Define the main UI with navbar
 app_ui = ui.page_navbar(
