@@ -54,24 +54,32 @@ tab2_ui = ui.div(
     style="text-align: center;"
 )
 
-# Define the main UI with navset_tab and page_sidebar
-app_ui = ui.page_sidebar(
-    ui.sidebar(
-        ui.input_selectize("country", "Pays", 
-                           choices=["Tout"] + countries,
-                           selected="Tout"),
-        ui.output_ui("newspaper_selector"),
-        ui.input_slider("year_range", "Années", 
-                        min=min_year, max=max_year, 
-                        value=[min_year, max_year],
-                        step=1,
-                        sep=""),
+# Define the main UI with navset_tab, page_sidebar, and navbar
+app_ui = ui.page_navbar(
+    ui.nav_panel("Analyse des mots clés",
+        ui.page_sidebar(
+            ui.sidebar(
+                ui.input_selectize("country", "Pays", 
+                                   choices=["Tout"] + countries,
+                                   selected="Tout"),
+                ui.output_ui("newspaper_selector"),
+                ui.input_slider("year_range", "Années", 
+                                min=min_year, max=max_year, 
+                                value=[min_year, max_year],
+                                step=1,
+                                sep=""),
+            ),
+            ui.navset_tab(
+                ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
+                ui.nav_panel("Comparaison de mots-clés choisis", tab2_ui),
+            ),
+        )
     ),
-    ui.navset_tab(
-        ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
-        ui.nav_panel("Comparaison de mots-clés choisis", tab2_ui),
-    ),
-    title="IWAC analyse des mots clés",
+    ui.nav_spacer(),
+    ui.nav_control(ui.input_dark_mode(id="dark_mode")),
+    title="Collection Islam Afrique de l'Ouest",
+    bg="#0062cc",
+    inverse=True,
 )
 
 # Define the server logic
