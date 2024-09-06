@@ -82,7 +82,7 @@ app_ui = ui.page_navbar(
         )
     ),
     ui.nav_spacer(),
-    ui.nav_control(ui.input_dark_mode(id="dark_mode")),
+    ui.nav_control(ui.input_dark_mode(id="dark_mode", mode="light")),  # Set mode to "light"
     title="Collection Islam Afrique de l'Ouest",
     bg="#0062cc",
     inverse=True,
