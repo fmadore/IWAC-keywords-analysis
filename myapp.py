@@ -21,31 +21,33 @@ countries = sorted(data['Country'].unique())
 categories = ["All"] + sorted(str(cat) for cat in data['Category'].unique() if pd.notna(cat))
 
 # Define the UI for the first tab (current visualization)
-tab1_ui = ui.layout_columns(
-    ui.column(2,
-        ui.input_selectize("country", "Select a country", 
-                           choices=["All"] + countries,
-                           selected="All")
+tab1_ui = ui.page_fluid(
+    ui.layout_columns(
+        ui.column(2,
+            ui.input_selectize("country", "Select a country", 
+                               choices=["All"] + countries,
+                               selected="All")
+        ),
+        ui.column(2,
+            ui.output_ui("newspaper_selector")
+        ),
+        ui.column(2,
+            ui.input_select("category", "Select a category",
+                            choices=categories,
+                            selected="All")
+        ),
+        ui.column(3, 
+            ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
+        ),
+        ui.column(3, 
+            ui.input_slider("year_range", "Select year range", 
+                            min=min_year, max=max_year, 
+                            value=[min_year, max_year],
+                            step=1,
+                            sep=""),
+        ),
     ),
-    ui.column(2,
-        ui.output_ui("newspaper_selector")
-    ),
-    ui.column(2,
-        ui.input_select("category", "Select a category",
-                        choices=categories,
-                        selected="All")
-    ),
-    ui.column(3, 
-        ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
-    ),
-    ui.column(3, 
-        ui.input_slider("year_range", "Select year range", 
-                        min=min_year, max=max_year, 
-                        value=[min_year, max_year],
-                        step=1,
-                        sep=""),
-    ),
-    output_widget("keyword_plot")
+    output_widget("keyword_plot")  # Use output_widget from shinywidgets
 )
 
 # Define the UI for the second tab (placeholder for future visualization)
