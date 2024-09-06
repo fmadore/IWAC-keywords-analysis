@@ -1,0 +1,12 @@
+{
+    "https://api.shinyapps.io": {
+        "server_url": "https://api.shinyapps.io",
+        "filename": "C:\\Users\\Fr\u00e9d\u00e9rick\\GitHub\\IWAC-keywords-analysis",
+        "app_url": "https://fmadore.shinyapps.io/iwac_keywords/",
+        "app_id": 12626708,
+        "app_guid": null,
+        "title": "IWAC keywords",
+        "app_mode": "python-shiny",
+        "app_store_version": 1
+    }
+}
