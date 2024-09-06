@@ -20,12 +20,18 @@ subject_counts = data['Subject'].value_counts()
 # Define the UI
 app_ui = ui.page_fluid(
     ui.h1("IWAC analyse des mots clés"),
-    ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
-    ui.input_slider("year_range", "Select year range", 
-                    min=min_year, max=max_year, 
-                    value=[min_year, max_year],
-                    step=1,
-                    sep=""),
+    ui.layout_columns(
+        ui.column(4, 
+            ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
+        ),
+        ui.column(8, 
+            ui.input_slider("year_range", "Select year range", 
+                            min=min_year, max=max_year, 
+                            value=[min_year, max_year],
+                            step=1,
+                            sep=""),
+        ),
+    ),
     output_widget("keyword_plot")
 )
 
