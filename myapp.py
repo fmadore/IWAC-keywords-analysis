@@ -24,6 +24,16 @@ categories = ["Tout"] + sorted(str(cat) for cat in data['Category'].unique() if 
 tab1_ui = ui.page_fluid(
     ui.div(
         ui.h2("Mots-clés les plus fréquents", style="text-align: center; margin-bottom: 20px;"),
+        ui.p(
+            "Le graphique interactif montre la fréquence annuelle des X mots-clés les plus fréquents selon les critères choisis "
+            "(par exemple, le pays, la période temporelle, ou le journal), tels qu'ils sont dérivés des métadonnées du Dublin Core Subject "
+            "et Spatial Coverage. Cette visualisation permet d'observer l'évolution de la prévalence des mots-clés au fil du temps, "
+            "révélant potentiellement des tendances ou des changements dans les sujets d'intérêt. Il est important de noter que "
+            "l'attribution de ces mots-clés n'est pas exhaustive. Par conséquent, l'analyse présentée ici doit être considérée comme "
+            "un premier aperçu qui mérite un examen plus approfondi pour apprécier pleinement les complexités et les subtilités de "
+            "l'ensemble de données.",
+            style="text-align: justify; margin-bottom: 20px; padding: 0 20px;"
+        ),
         style="padding-top: 60px;"  # Add padding to the top to account for the fixed navbar
     ),
     ui.layout_columns(
