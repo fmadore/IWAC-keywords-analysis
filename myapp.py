@@ -14,22 +14,27 @@ data['Date'] = pd.to_datetime(data['Date']).dt.tz_localize(None)
 min_year = data['Date'].dt.year.min().astype(int)
 max_year = data['Date'].dt.year.max().astype(int)
 
-# Count occurrences of each subject
-subject_counts = data['Subject'].value_counts()
+# Get unique countries
+countries = sorted(data['Country'].unique())
 
 # Define the UI
 app_ui = ui.page_fluid(
     ui.h1("IWAC analyse des mots clés"),
     ui.layout_columns(
-        ui.column(4, 
+        ui.column(3, 
             ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
         ),
-        ui.column(8, 
+        ui.column(6, 
             ui.input_slider("year_range", "Select year range", 
                             min=min_year, max=max_year, 
                             value=[min_year, max_year],
                             step=1,
                             sep=""),
+        ),
+        ui.column(3,
+            ui.input_selectize("country", "Select a country", 
+                               choices=["All"] + countries,
+                               selected="All")
         ),
     ),
     output_widget("keyword_plot")
@@ -45,10 +50,17 @@ def server(input, output, session):
         # Get the selected year range
         start_year, end_year = input.year_range()
         
+        # Get the selected country
+        selected_country = input.country()
+        
         # Filter data based on the selected year range
         date_filtered_data = data[(data['Date'].dt.year >= start_year) & (data['Date'].dt.year <= end_year)]
         
-        # Count occurrences of each subject within the year range
+        # Filter by country if a specific country is selected
+        if selected_country != "All":
+            date_filtered_data = date_filtered_data[date_filtered_data['Country'] == selected_country]
+        
+        # Count occurrences of each subject within the filtered data
         subject_counts = date_filtered_data['Subject'].value_counts()
         
         # Get the top N subjects
@@ -61,8 +73,9 @@ def server(input, output, session):
         grouped_data = filtered_data.groupby([filtered_data['Date'].dt.year, 'Subject']).size().reset_index(name='Count')
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
+        country_title = f" in {selected_country}" if selected_country != "All" else ""
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prevalence of Top {top_n} Keywords ({start_year} - {end_year})')
+                      title=f'Prevalence of Top {top_n} Keywords{country_title} ({start_year} - {end_year})')
         fig.update_layout(
             xaxis_title='Year', 
             yaxis_title='Frequency',
