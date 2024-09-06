@@ -36,7 +36,6 @@ tab1_ui = ui.page_fluid(
             style="text-align: justify; margin-bottom: 20px; padding: 0 20px;"
         ),
     ),
-    ui.input_slider("top_n", "# mots-clés", min=1, max=10, value=5, step=1),
     output_widget("keyword_plot")
 )
 
@@ -45,12 +44,12 @@ tab2_ui = ui.div(
     ui.h2("Comparaison de mots-clés choisis", style="text-align: center; margin-bottom: 20px;"),
     ui.p(
         "Cette visualisation permet de comparer la fréquence annuelle des mots-clés sélectionnés. "
-        "Choisissez jusqu'à 5 mots-clés pour observer leur évolution au fil du temps selon les critères choisis.",
+        "Choisissez jusqu'à X mots-clés pour observer leur évolution au fil du temps selon les critères choisis.",
         style="text-align: justify; margin-bottom: 20px; padding: 0 20px;"
     ),
     ui.input_selectize(
         "selected_keywords",
-        "Sélectionnez jusqu'à 5 mots-clés",
+        "Sélectionnez les mots-clés",
         choices=[],  # We'll populate this dynamically
         multiple=True
     ),
@@ -74,6 +73,7 @@ app_ui = ui.page_navbar(
                                 value=[min_year, max_year],
                                 step=1,
                                 sep=""),
+                ui.input_slider("top_n", "# mots-clés", min=1, max=10, value=5, step=1),
             ),
             ui.navset_tab(
                 ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
@@ -177,7 +177,7 @@ def server(input, output, session):
         return fig
 
     @reactive.Effect
-    @reactive.event(input.country, input.newspapers, input.category)
+    @reactive.event(input.country, input.newspapers, input.category, input.top_n)
     def update_keyword_choices():
         # Filter data based on current selections
         filtered_data = data
@@ -193,7 +193,8 @@ def server(input, output, session):
 
         # Get unique subjects, excluding the ones we don't want
         excluded_keywords = ["Bénin", "Togo", "Burkina Faso"]
-        unique_subjects = sorted(set(filtered_data['Subject']) - set(excluded_keywords))
+        unique_subjects = filtered_data['Subject'].value_counts().nlargest(input.top_n()).index.tolist()
+        unique_subjects = [subj for subj in unique_subjects if subj not in excluded_keywords]
 
         # Update the choices for the keyword selector
         ui.update_selectize("selected_keywords", choices=unique_subjects, selected=[])
@@ -202,7 +203,7 @@ def server(input, output, session):
     def comparison_plot():
         selected_keywords = input.selected_keywords()
         if not selected_keywords:
-            return px.scatter(title="Veuillez sélectionner au moins un mot-clé")
+            return px.scatter(title=f"Veuillez sélectionner jusqu'à {input.top_n()} mots-clés")
 
         # Get the selected year range
         start_year, end_year = input.year_range()
