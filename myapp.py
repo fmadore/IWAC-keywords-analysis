@@ -160,10 +160,10 @@ def server(input, output, session):
         newspaper_title = f" ({', '.join(selected_newspapers)})" if selected_newspapers else ""
         category_title = f" for {selected_category}" if selected_category != "Tout" else ""
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prevalence of Top {top_n} Keywords{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
+                      title=f'Prévalence des {top_n} principaux mots-clés{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
         fig.update_layout(
-            xaxis_title='Year', 
-            yaxis_title='Frequency',
+            xaxis_title='Année', 
+            yaxis_title='Fréquence',
             height=600,
             margin=dict(t=100, l=50, r=50, b=50),  # Add more margin on all sides
             legend=dict(
