@@ -156,11 +156,14 @@ def server(input, output, session):
         grouped_data = filtered_data.groupby([filtered_data['Date'].dt.year, 'Subject']).size().reset_index(name='Count')
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
-        country_title = f" in {selected_country}" if selected_country != "Tout" else ""
-        newspaper_title = f" ({', '.join(selected_newspapers)})" if selected_newspapers else ""
-        category_title = f" for {selected_category}" if selected_category != "Tout" else ""
+        country_title = f"in {selected_country}" if selected_country != "Tout" else ""
+        newspaper_title = f"({', '.join(selected_newspapers)})" if selected_newspapers else ""
+        category_title = f"for {selected_category}" if selected_category != "Tout" else ""
+        title_line1 = f'Prévalence des {top_n} principaux mots-clés'
+        title_line2 = f'{country_title} {newspaper_title} {category_title} ({start_year} - {end_year})'.strip()
+        
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prévalence des {top_n} principaux mots-clés{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
+                      title=f'{title_line1}<br>{title_line2}')
         fig.update_layout(
             xaxis_title='Année', 
             yaxis_title='Fréquence',
@@ -175,7 +178,7 @@ def server(input, output, session):
                 bordercolor="Black",
                 borderwidth=1
             ),
-            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top')  # Center the title and move it down slightly
+            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top', text=f'{title_line1}<br>{title_line2}')  # Center the title and move it down slightly
         )
         return fig
 
@@ -233,12 +236,15 @@ def server(input, output, session):
         grouped_data = keyword_data.groupby([keyword_data['Date'].dt.year, 'Subject']).size().reset_index(name='Count')
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
-        country_title = f" in {input.country()}" if input.country() != "Tout" else ""
-        newspaper_title = f" ({', '.join(input.newspapers())})" if input.newspapers() else ""
-        category_title = f" for {input.category()}" if input.category() != "Tout" else ""
+        country_title = f"in {input.country()}" if input.country() != "Tout" else ""
+        newspaper_title = f"({', '.join(input.newspapers())})" if input.newspapers() else ""
+        category_title = f"for {input.category()}" if input.category() != "Tout" else ""
+        
+        title_line1 = f'Comparaison des {len(selected_keywords)} mots-clés sélectionnés'
+        title_line2 = f'{country_title} {newspaper_title} {category_title} ({start_year} - {end_year})'.strip()
         
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Comparaison des {len(selected_keywords)} mots-clés sélectionnés{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
+                      title=f'{title_line1}<br>{title_line2}')
         fig.update_layout(
             xaxis_title='Année', 
             yaxis_title='Fréquence',
@@ -253,7 +259,7 @@ def server(input, output, session):
                 bordercolor="Black",
                 borderwidth=1
             ),
-            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top')  # Center the title and move it down slightly
+            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top', text=f'{title_line1}<br>{title_line2}')  # Center the title and move it down slightly
         )
         return fig
 
