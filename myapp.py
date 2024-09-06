@@ -45,7 +45,6 @@ tab1_ui = ui.page_fluid(
             ui.input_numeric("top_n", "# mots-clés", 5, min=1, max=20),
         ),
     ),
-    ui.output_ui("newspaper_selector"),
     output_widget("keyword_plot")
 )
 
@@ -61,6 +60,7 @@ app_ui = ui.page_sidebar(
         ui.input_selectize("country", "Pays", 
                            choices=["Tout"] + countries,
                            selected="Tout"),
+        ui.output_ui("newspaper_selector"),
         ui.input_slider("year_range", "Années", 
                         min=min_year, max=max_year, 
                         value=[min_year, max_year],
@@ -69,7 +69,6 @@ app_ui = ui.page_sidebar(
     ),
     ui.navset_tab(
         ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
-        ui.nav_panel("Journaux", ui.h2("Contenu pour Journaux à venir")),
         ui.nav_panel("Comparaison de mots-clés choisis", tab2_ui),
     ),
     title="IWAC analyse des mots clés",
