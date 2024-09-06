@@ -56,7 +56,7 @@ tab2_ui = ui.div(
 
 # Define the main UI with navset_tab, page_sidebar, and navbar
 app_ui = ui.page_navbar(
-    ui.nav_panel("Analyse des mots clés",
+    ui.nav_panel("Analyse des mots-clés",
         ui.page_sidebar(
             ui.sidebar(
                 ui.input_selectize("country", "Pays", 
