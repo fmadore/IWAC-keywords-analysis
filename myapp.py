@@ -1,4 +1,4 @@
-from shiny import App, ui, render
+from shiny import App, ui, render, reactive
 from shinywidgets import output_widget, render_widget
 import pandas as pd
 import plotly.express as px
@@ -26,10 +26,13 @@ app_ui = ui.page_fluid(
                                choices=["All"] + countries,
                                selected="All")
         ),
+        ui.column(3,
+            ui.output_ui("newspaper_selector")
+        ),
         ui.column(3, 
             ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
         ),
-        ui.column(6, 
+        ui.column(3, 
             ui.input_slider("year_range", "Select year range", 
                             min=min_year, max=max_year, 
                             value=[min_year, max_year],
@@ -42,6 +45,24 @@ app_ui = ui.page_fluid(
 
 # Define the server logic
 def server(input, output, session):
+
+    @output
+    @render.ui
+    def newspaper_selector():
+        selected_country = input.country()
+        if selected_country == "All":
+            newspapers = sorted(data['Newspaper'].unique())
+        else:
+            newspapers = sorted(data[data['Country'] == selected_country]['Newspaper'].unique())
+        
+        return ui.input_select(
+            "newspapers",
+            "Select newspapers",
+            choices=["All"] + newspapers,
+            selected="All",
+            multiple=True
+        )
+
     @render_widget
     def keyword_plot():
         # Get the number of top keywords from the numeric input
@@ -53,12 +74,19 @@ def server(input, output, session):
         # Get the selected country
         selected_country = input.country()
         
+        # Get the selected newspapers
+        selected_newspapers = input.newspapers()
+        
         # Filter data based on the selected year range
         date_filtered_data = data[(data['Date'].dt.year >= start_year) & (data['Date'].dt.year <= end_year)]
         
         # Filter by country if a specific country is selected
         if selected_country != "All":
             date_filtered_data = date_filtered_data[date_filtered_data['Country'] == selected_country]
+        
+        # Filter by newspapers if specific newspapers are selected
+        if "All" not in selected_newspapers:
+            date_filtered_data = date_filtered_data[date_filtered_data['Newspaper'].isin(selected_newspapers)]
         
         # Count occurrences of each subject within the filtered data
         subject_counts = date_filtered_data['Subject'].value_counts()
@@ -74,8 +102,9 @@ def server(input, output, session):
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
         country_title = f" in {selected_country}" if selected_country != "All" else ""
+        newspaper_title = f" ({', '.join(selected_newspapers)})" if "All" not in selected_newspapers else ""
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prevalence of Top {top_n} Keywords{country_title} ({start_year} - {end_year})')
+                      title=f'Prevalence of Top {top_n} Keywords{country_title}{newspaper_title} ({start_year} - {end_year})')
         fig.update_layout(
             xaxis_title='Year', 
             yaxis_title='Frequency',
