@@ -36,16 +36,20 @@ def fetch_and_process_data(api_url, item_sets, api_key, api_identity):
         for future in tqdm(as_completed(future_to_id), total=len(item_sets), desc="Fetching data"):
             all_items.extend(future.result())
     
-    # Process items to extract subjects and date
+    # Process items to extract subjects, date, newspaper, and country
     processed_data = []
     for item in tqdm(all_items, desc="Processing items"):
-        subjects = [sub['display_title'] for sub in item.get('dcterms:subject', []) if sub.get('display_title')]
+        subjects = [sub.get('display_title') or sub.get('@value') for sub in item.get('dcterms:subject', []) if sub.get('display_title') or sub.get('@value')]
         date = item.get('dcterms:date', [{}])[0].get('@value')
+        newspaper = item.get('dcterms:publisher', [{}])[0].get('display_title', '')
+        item_set_id = item.get('o:item_set', [{}])[0].get('o:id', '')
+        country = item_set_to_country.get(str(item_set_id), '')
         for subject in subjects:
             processed_data.append({
                 'Subject': subject,
                 'Date': date,  # Keep as string for JSON serialization
-                'Country': item.get('country', '')  # Assuming there's a 'country' field in the API response
+                'Country': country,
+                'Newspaper': newspaper
             })
     
     return processed_data
@@ -61,6 +65,8 @@ if __name__ == "__main__":
         "Burkina Faso": ["2200", "2215", "2214", "2207", "2201"],
         "Togo": ["5498", "5499"]
     }
+
+    item_set_to_country = {item_set: country for country, item_sets in country_item_sets.items() for item_set in item_sets}
 
     all_data = []
     for country, item_sets in country_item_sets.items():
