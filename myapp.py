@@ -21,6 +21,11 @@ countries = sorted(data['Country'].unique())
 app_ui = ui.page_fluid(
     ui.h1("IWAC analyse des mots clés"),
     ui.layout_columns(
+        ui.column(3,
+            ui.input_selectize("country", "Select a country", 
+                               choices=["All"] + countries,
+                               selected="All")
+        ),
         ui.column(3, 
             ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
         ),
@@ -30,11 +35,6 @@ app_ui = ui.page_fluid(
                             value=[min_year, max_year],
                             step=1,
                             sep=""),
-        ),
-        ui.column(3,
-            ui.input_selectize("country", "Select a country", 
-                               choices=["All"] + countries,
-                               selected="All")
         ),
     ),
     output_widget("keyword_plot")
