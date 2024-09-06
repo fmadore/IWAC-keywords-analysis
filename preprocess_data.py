@@ -9,23 +9,25 @@ import os
 # Load environment variables
 load_dotenv()
 
+# Function to fetch all pages from an API endpoint
+def fetch_all_pages(api_url, params, headers):
+    all_items = []
+    page = 1
+    while True:
+        params['page'] = page
+        response = requests.get(api_url, params=params, headers=headers)
+        data = response.json()
+        if not data:
+            break
+        all_items.extend(data)
+        page += 1
+    return all_items
+
 # Function to fetch data from a single item set
 def fetch_data(api_url, item_set_id, api_key, api_identity):
-    page = 1
-    items = []
-    while True:
-        response = requests.get(
-            f"{api_url}/items",
-            params={"item_set_id": item_set_id, "page": page},
-            headers={"X-Api-Key": api_key, "X-Api-Identity": api_identity}
-        )
-        data = response.json()
-        if data:
-            items.extend(data)
-            page += 1
-        else:
-            break
-    return items
+    params = {"item_set_id": item_set_id}
+    headers = {"X-Api-Key": api_key, "X-Api-Identity": api_identity}
+    return fetch_all_pages(f"{api_url}/items", params, headers)
 
 # Function to fetch and process data for all item sets in a country
 def fetch_and_process_data(api_url, item_sets, api_key, api_identity):
@@ -39,20 +41,36 @@ def fetch_and_process_data(api_url, item_sets, api_key, api_identity):
     # Process items to extract subjects, date, newspaper, and country
     processed_data = []
     for item in tqdm(all_items, desc="Processing items"):
-        subjects = [sub.get('display_title') or sub.get('@value') for sub in item.get('dcterms:subject', []) if sub.get('display_title') or sub.get('@value')]
+        subjects = []
+        for sub in item.get('dcterms:subject', []):
+            subject_info = {
+                'display_title': sub.get('display_title') or sub.get('@value'),
+                'value_resource_id': sub.get('value_resource_id')
+            }
+            subjects.append(subject_info)
+        
         date = item.get('dcterms:date', [{}])[0].get('@value')
         newspaper = item.get('dcterms:publisher', [{}])[0].get('display_title', '')
         item_set_id = item.get('o:item_set', [{}])[0].get('o:id', '')
         country = item_set_to_country.get(str(item_set_id), '')
+        
         for subject in subjects:
             processed_data.append({
-                'Subject': subject,
-                'Date': date,  # Keep as string for JSON serialization
+                'Subject': subject['display_title'],
+                'value_resource_id': subject['value_resource_id'],
+                'Date': date,
                 'Country': country,
                 'Newspaper': newspaper
             })
     
     return processed_data
+
+# Function to fetch category mappings
+def fetch_category_mappings(api_url, item_set_id, api_key, api_identity):
+    params = {"item_set_id": item_set_id}
+    headers = {"X-Api-Key": api_key, "X-Api-Identity": api_identity}
+    items = fetch_all_pages(f"{api_url}/items", params, headers)
+    return {str(item['o:id']): item['dcterms:title'][0]['@value'] for item in items if 'dcterms:title' in item}
 
 # Main execution
 if __name__ == "__main__":
@@ -68,12 +86,39 @@ if __name__ == "__main__":
 
     item_set_to_country = {item_set: country for country, item_sets in country_item_sets.items() for item_set in item_sets}
 
+    # Fetch category mappings
+    print("Fetching category mappings...")
+    associations = fetch_category_mappings(api_url, "854", api_key, api_identity)
+    emplacements = fetch_category_mappings(api_url, "268", api_key, api_identity)
+    evenements = fetch_category_mappings(api_url, "2", api_key, api_identity)
+    sujets = fetch_category_mappings(api_url, "1", api_key, api_identity)
+    individus = fetch_category_mappings(api_url, "266", api_key, api_identity)
+
     all_data = []
     for country, item_sets in country_item_sets.items():
         print(f"Processing data for {country}...")
         country_data = fetch_and_process_data(api_url, item_sets, api_key, api_identity)
         all_data.extend(country_data)
         print(f"Processed {len(country_data)} items for {country}")
+
+    # Map value_resource_id to categories
+    for item in tqdm(all_data, desc="Mapping categories"):
+        value_resource_id = str(item['value_resource_id'])
+        if value_resource_id in associations:
+            item['Category'] = 'Association'
+        elif value_resource_id in emplacements:
+            item['Category'] = 'Emplacement'
+        elif value_resource_id in evenements:
+            item['Category'] = 'Évènement'
+        elif value_resource_id in sujets:
+            item['Category'] = 'Sujet'
+        elif value_resource_id in individus:
+            item['Category'] = 'Individu'
+        else:
+            item['Category'] = None
+        
+        # Remove the value_resource_id from the final output
+        del item['value_resource_id']
 
     # Save all data to a single JSON file
     with open("preprocessed_data.json", "w", encoding="utf-8") as f:
