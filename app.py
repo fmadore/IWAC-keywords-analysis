@@ -248,8 +248,8 @@ def server(input, output, session):
         fig.update_layout(
             xaxis_title='Année', 
             yaxis_title='Fréquence',
-            height=600,  # Increase the height to 600 pixels
-            margin=dict(t=100, l=50, r=50, b=50),  # Add more margin on all sides
+            height=600,
+            margin=dict(t=100, l=50, r=50, b=50),
             legend=dict(
                 yanchor="top",
                 y=0.99,
@@ -259,7 +259,7 @@ def server(input, output, session):
                 bordercolor="Black",
                 borderwidth=1
             ),
-            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top', text=f'{title_line1}<br>{title_line2}')  # Center the title and move it down slightly
+            title=dict(y=0.95, x=0.5, xanchor='center', yanchor='top', text=f'{title_line1}<br>{title_line2}')
         )
         return fig
 
