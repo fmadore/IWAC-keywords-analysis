@@ -191,10 +191,9 @@ def server(input, output, session):
         if input.category() != "Tout":
             filtered_data = filtered_data[filtered_data['Category'] == input.category()]
 
-        # Get unique subjects, excluding the ones we don't want
+        # Get all unique subjects, excluding the ones we don't want
         excluded_keywords = ["Bénin", "Togo", "Burkina Faso"]
-        unique_subjects = filtered_data['Subject'].value_counts().nlargest(input.top_n()).index.tolist()
-        unique_subjects = [subj for subj in unique_subjects if subj not in excluded_keywords]
+        unique_subjects = sorted(set(filtered_data['Subject']) - set(excluded_keywords))
 
         # Update the choices for the keyword selector
         ui.update_selectize("selected_keywords", choices=unique_subjects, selected=[])
@@ -204,6 +203,9 @@ def server(input, output, session):
         selected_keywords = input.selected_keywords()
         if not selected_keywords:
             return px.scatter(title=f"Veuillez sélectionner jusqu'à {input.top_n()} mots-clés")
+
+        if len(selected_keywords) > input.top_n():
+            selected_keywords = selected_keywords[:input.top_n()]
 
         # Get the selected year range
         start_year, end_year = input.year_range()
@@ -233,7 +235,7 @@ def server(input, output, session):
         category_title = f" for {input.category()}" if input.category() != "Tout" else ""
         
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Comparaison des mots-clés sélectionnés{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
+                      title=f'Comparaison des {len(selected_keywords)} mots-clés sélectionnés{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
         fig.update_layout(
             xaxis_title='Année', 
             yaxis_title='Fréquence',
