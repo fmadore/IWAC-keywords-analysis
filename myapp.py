@@ -122,11 +122,8 @@ def server(input, output, session):
         # Define excluded keywords
         excluded_keywords = ["Bénin", "Togo", "Burkina Faso"]
         
-        # Exclude the specified keywords
-        date_filtered_data = date_filtered_data[~date_filtered_data['Subject'].isin(excluded_keywords)]
-        
-        # Count occurrences of each subject within the filtered data
-        subject_counts = date_filtered_data['Subject'].value_counts()
+        # Count occurrences of each subject within the filtered data, excluding the specified keywords
+        subject_counts = date_filtered_data[~date_filtered_data['Subject'].isin(excluded_keywords)]['Subject'].value_counts()
         
         # Get the top N subjects
         top_n_subjects = subject_counts.nlargest(top_n).index.tolist()
