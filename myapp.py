@@ -21,12 +21,9 @@ subject_counts = data['Subject'].value_counts()
 app_ui = ui.page_fluid(
     ui.h1("IWAC analyse des mots clés"),
     ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
-    ui.input_date_range("date_range", "Select date range",
-                        start=f"{min_year}-01-01",
-                        end=f"{max_year}-12-31",
-                        min=f"{min_year}-01-01",
-                        max=f"{max_year}-12-31",
-                        format="yyyy-mm-dd"),
+    ui.input_slider("year_range", "Select year range", 
+                    min=min_year, max=max_year, 
+                    value=[min_year, max_year]),
     output_widget("keyword_plot")
 )
 
@@ -37,15 +34,13 @@ def server(input, output, session):
         # Get the number of top keywords from the numeric input
         top_n = input.top_n()
         
-        # Get the selected date range and convert to datetime
-        start_date, end_date = input.date_range()
-        start_date = pd.to_datetime(start_date).tz_localize(None)
-        end_date = pd.to_datetime(end_date).tz_localize(None)
+        # Get the selected year range
+        start_year, end_year = input.year_range()
         
-        # Filter data based on the selected date range
-        date_filtered_data = data[(data['Date'] >= start_date) & (data['Date'] <= end_date)]
+        # Filter data based on the selected year range
+        date_filtered_data = data[(data['Date'].dt.year >= start_year) & (data['Date'].dt.year <= end_year)]
         
-        # Count occurrences of each subject within the date range
+        # Count occurrences of each subject within the year range
         subject_counts = date_filtered_data['Subject'].value_counts()
         
         # Get the top N subjects
@@ -59,7 +54,7 @@ def server(input, output, session):
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prevalence of Top {top_n} Keywords ({start_date.year} - {end_date.year})')
+                      title=f'Prevalence of Top {top_n} Keywords ({start_year} - {end_year})')
         fig.update_layout(
             xaxis_title='Year', 
             yaxis_title='Frequency',
