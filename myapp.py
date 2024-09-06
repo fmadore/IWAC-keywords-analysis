@@ -17,17 +17,25 @@ max_year = data['Date'].dt.year.max().astype(int)
 # Get unique countries
 countries = sorted(data['Country'].unique())
 
+# Get unique categories, filtering out None values and converting to strings
+categories = ["All"] + sorted(str(cat) for cat in data['Category'].unique() if pd.notna(cat))
+
 # Define the UI
 app_ui = ui.page_fluid(
     ui.h1("IWAC analyse des mots clés"),
     ui.layout_columns(
-        ui.column(3,
+        ui.column(2,
             ui.input_selectize("country", "Select a country", 
                                choices=["All"] + countries,
                                selected="All")
         ),
-        ui.column(3,
+        ui.column(2,
             ui.output_ui("newspaper_selector")
+        ),
+        ui.column(2,
+            ui.input_select("category", "Select a category",
+                            choices=categories,
+                            selected="All")
         ),
         ui.column(3, 
             ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
@@ -76,6 +84,9 @@ def server(input, output, session):
         # Get the selected newspapers
         selected_newspapers = input.newspapers()
         
+        # Get the selected category
+        selected_category = input.category()
+        
         # Filter data based on the selected year range
         date_filtered_data = data[(data['Date'].dt.year >= start_year) & (data['Date'].dt.year <= end_year)]
         
@@ -86,6 +97,10 @@ def server(input, output, session):
         # Filter by newspapers if any are selected
         if selected_newspapers:
             date_filtered_data = date_filtered_data[date_filtered_data['Newspaper'].isin(selected_newspapers)]
+        
+        # Filter by category if a specific category is selected
+        if selected_category != "All":
+            date_filtered_data = date_filtered_data[date_filtered_data['Category'] == selected_category]
         
         # Count occurrences of each subject within the filtered data
         subject_counts = date_filtered_data['Subject'].value_counts()
@@ -102,8 +117,9 @@ def server(input, output, session):
         
         country_title = f" in {selected_country}" if selected_country != "All" else ""
         newspaper_title = f" ({', '.join(selected_newspapers)})" if selected_newspapers else ""
+        category_title = f" for {selected_category}" if selected_category != "All" else ""
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
-                      title=f'Prevalence of Top {top_n} Keywords{country_title}{newspaper_title} ({start_year} - {end_year})')
+                      title=f'Prevalence of Top {top_n} Keywords{country_title}{newspaper_title}{category_title} ({start_year} - {end_year})')
         fig.update_layout(
             xaxis_title='Year', 
             yaxis_title='Frequency',
