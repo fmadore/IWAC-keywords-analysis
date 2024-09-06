@@ -165,6 +165,7 @@ def server(input, output, session):
             xaxis_title='Year', 
             yaxis_title='Frequency',
             height=600,  # Increase the height to 600 pixels
+            margin=dict(t=100),  # Add more top margin
             legend=dict(
                 yanchor="top",
                 y=0.99,
@@ -241,6 +242,7 @@ def server(input, output, session):
             xaxis_title='Année', 
             yaxis_title='Fréquence',
             height=600,  # Increase the height to 600 pixels
+            margin=dict(t=100),  # Add more top margin
             legend=dict(
                 yanchor="top",
                 y=0.99,
