@@ -20,35 +20,43 @@ countries = sorted(data['Country'].unique())
 # Get unique categories, filtering out None values and converting to strings
 categories = ["All"] + sorted(str(cat) for cat in data['Category'].unique() if pd.notna(cat))
 
-# Define the UI
-app_ui = ui.page_fluid(
-    ui.h1("IWAC analyse des mots clés"),
-    ui.layout_columns(
-        ui.column(2,
-            ui.input_selectize("country", "Select a country", 
-                               choices=["All"] + countries,
-                               selected="All")
-        ),
-        ui.column(2,
-            ui.output_ui("newspaper_selector")
-        ),
-        ui.column(2,
-            ui.input_select("category", "Select a category",
-                            choices=categories,
-                            selected="All")
-        ),
-        ui.column(3, 
-            ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
-        ),
-        ui.column(3, 
-            ui.input_slider("year_range", "Select year range", 
-                            min=min_year, max=max_year, 
-                            value=[min_year, max_year],
-                            step=1,
-                            sep=""),
-        ),
+# Define the UI for the first tab (current visualization)
+tab1_ui = ui.layout_columns(
+    ui.column(2,
+        ui.input_selectize("country", "Select a country", 
+                           choices=["All"] + countries,
+                           selected="All")
+    ),
+    ui.column(2,
+        ui.output_ui("newspaper_selector")
+    ),
+    ui.column(2,
+        ui.input_select("category", "Select a category",
+                        choices=categories,
+                        selected="All")
+    ),
+    ui.column(3, 
+        ui.input_numeric("top_n", "Number of top keywords to display", 10, min=1, max=20),
+    ),
+    ui.column(3, 
+        ui.input_slider("year_range", "Select year range", 
+                        min=min_year, max=max_year, 
+                        value=[min_year, max_year],
+                        step=1,
+                        sep=""),
     ),
     output_widget("keyword_plot")
+)
+
+# Define the UI for the second tab (placeholder for future visualization)
+tab2_ui = ui.h2("Comparaison de mots-clés choisis (à venir)")
+
+# Define the main UI with navbar
+app_ui = ui.page_navbar(
+    ui.nav_panel("Mots-clés les plus fréquents", tab1_ui),
+    ui.nav_panel("Comparaison de mots-clés choisis", tab2_ui),
+    title="IWAC analyse des mots clés",
+    id="navbar"
 )
 
 # Define the server logic
