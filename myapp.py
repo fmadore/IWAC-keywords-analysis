@@ -42,7 +42,7 @@ tab1_ui = ui.page_fluid(
                             selected="Tout")
         ),
         ui.column(4, 
-            ui.input_numeric("top_n", "# mots-clés", 5, min=1, max=20),
+            ui.input_slider("top_n", "# mots-clés", min=1, max=10, value=5, step=1),
         ),
     ),
     output_widget("keyword_plot")
