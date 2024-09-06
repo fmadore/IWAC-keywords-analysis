@@ -164,6 +164,7 @@ def server(input, output, session):
         fig.update_layout(
             xaxis_title='Year', 
             yaxis_title='Frequency',
+            height=600,  # Increase the height to 600 pixels
             legend=dict(
                 yanchor="top",
                 y=0.99,
@@ -239,6 +240,7 @@ def server(input, output, session):
         fig.update_layout(
             xaxis_title='Année', 
             yaxis_title='Fréquence',
+            height=600,  # Increase the height to 600 pixels
             legend=dict(
                 yanchor="top",
                 y=0.99,
