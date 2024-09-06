@@ -55,12 +55,11 @@ def server(input, output, session):
         else:
             newspapers = sorted(data[data['Country'] == selected_country]['Newspaper'].unique())
         
-        return ui.input_select(
+        return ui.input_checkbox_group(
             "newspapers",
             "Select newspapers",
-            choices=["All"] + newspapers,
-            selected="All",
-            multiple=True
+            choices=newspapers,
+            selected=newspapers  # Select all newspapers by default
         )
 
     @render_widget
@@ -84,8 +83,8 @@ def server(input, output, session):
         if selected_country != "All":
             date_filtered_data = date_filtered_data[date_filtered_data['Country'] == selected_country]
         
-        # Filter by newspapers if specific newspapers are selected
-        if "All" not in selected_newspapers:
+        # Filter by newspapers if any are selected
+        if selected_newspapers:
             date_filtered_data = date_filtered_data[date_filtered_data['Newspaper'].isin(selected_newspapers)]
         
         # Count occurrences of each subject within the filtered data
@@ -102,7 +101,7 @@ def server(input, output, session):
         grouped_data.rename(columns={grouped_data.columns[0]: 'Year'}, inplace=True)
         
         country_title = f" in {selected_country}" if selected_country != "All" else ""
-        newspaper_title = f" ({', '.join(selected_newspapers)})" if "All" not in selected_newspapers else ""
+        newspaper_title = f" ({', '.join(selected_newspapers)})" if selected_newspapers else ""
         fig = px.line(grouped_data, x='Year', y='Count', color='Subject',
                       title=f'Prevalence of Top {top_n} Keywords{country_title}{newspaper_title} ({start_year} - {end_year})')
         fig.update_layout(
